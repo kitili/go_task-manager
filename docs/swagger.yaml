@@ -1,0 +1,1576 @@
+basePath: /api/v1
+definitions:
+  api.APIResponse:
+    properties:
+      data: {}
+      error:
+        example: ""
+        type: string
+      message:
+        example: Operation completed successfully
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  api.CategoryRequest:
+    properties:
+      color:
+        example: '#ff0000'
+        type: string
+      description:
+        example: Work-related tasks
+        type: string
+      name:
+        example: Work
+        type: string
+    required:
+    - name
+    type: object
+  api.CategoryResponse:
+    properties:
+      color:
+        example: '#ff0000'
+        type: string
+      created_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      description:
+        example: Work-related tasks
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: Work
+        type: string
+      updated_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+    type: object
+  api.DependencyRequest:
+    properties:
+      depends_on_task_id:
+        example: 1
+        type: integer
+      task_id:
+        example: 2
+        type: integer
+    required:
+    - depends_on_task_id
+    - task_id
+    type: object
+  api.DependencyResponse:
+    properties:
+      created_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      depends_on_task_id:
+        example: 1
+        type: integer
+      id:
+        example: 1
+        type: integer
+      task_id:
+        example: 2
+        type: integer
+    type: object
+  api.ErrorResponse:
+    properties:
+      code:
+        example: 400
+        type: integer
+      error:
+        example: detailed error message
+        type: string
+      message:
+        example: An error occurred
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
+  api.ExportRequest:
+    properties:
+      category_id:
+        example: 1
+        type: integer
+      created_after:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      due_before:
+        example: "2024-12-31T23:59:59Z"
+        type: string
+      format:
+        enum:
+        - json
+        - csv
+        example: json
+        type: string
+      include_categories:
+        example: true
+        type: boolean
+      include_tags:
+        example: true
+        type: boolean
+      include_users:
+        example: true
+        type: boolean
+      priority:
+        example: 3
+        type: integer
+      status:
+        example: 0
+        type: integer
+      tag_names:
+        example:
+        - '["learning"'
+        - ' "programming"]'
+        items:
+          type: string
+        type: array
+    required:
+    - format
+    type: object
+  api.HealthResponse:
+    properties:
+      services:
+        additionalProperties:
+          type: string
+        example:
+          '"notifications"': '"healthy"}'
+          '{"database"': '"healthy"'
+        type: object
+      status:
+        example: healthy
+        type: string
+      timestamp:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      uptime:
+        example: 2h30m15s
+        type: string
+      version:
+        example: 1.0.0
+        type: string
+    type: object
+  api.ImportRequest:
+    properties:
+      dry_run:
+        example: false
+        type: boolean
+      format:
+        enum:
+        - json
+        - csv
+        example: json
+        type: string
+      overwrite_existing:
+        example: false
+        type: boolean
+      skip_duplicates:
+        example: true
+        type: boolean
+    required:
+    - format
+    type: object
+  api.LoginRequest:
+    properties:
+      password:
+        example: password123
+        type: string
+      username:
+        example: johndoe
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  api.LoginResponse:
+    properties:
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      user:
+        $ref: '#/definitions/api.UserResponse'
+    type: object
+  api.NotificationRequest:
+    properties:
+      channel:
+        example: '#general'
+        type: string
+      message:
+        example: Your task is due soon
+        type: string
+      priority:
+        enum:
+        - low
+        - normal
+        - high
+        - critical
+        example: normal
+        type: string
+      recipient:
+        example: user@example.com
+        type: string
+      scheduled_at:
+        example: "2024-12-31T23:59:59Z"
+        type: string
+      title:
+        example: Task Reminder
+        type: string
+      type:
+        enum:
+        - email
+        - in_app
+        - sms
+        - webhook
+        - slack
+        - discord
+        example: email
+        type: string
+    required:
+    - message
+    - priority
+    - title
+    - type
+    type: object
+  api.NotificationResponse:
+    properties:
+      channel:
+        example: '#general'
+        type: string
+      created_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      delivered_at:
+        example: "2024-12-31T23:59:59Z"
+        type: string
+      error:
+        example: ""
+        type: string
+      id:
+        example: 1
+        type: integer
+      max_retries:
+        example: 3
+        type: integer
+      message:
+        example: Your task is due soon
+        type: string
+      priority:
+        example: normal
+        type: string
+      recipient:
+        example: user@example.com
+        type: string
+      retry_count:
+        example: 0
+        type: integer
+      scheduled_at:
+        example: "2024-12-31T23:59:59Z"
+        type: string
+      sent_at:
+        example: "2024-12-31T23:59:59Z"
+        type: string
+      status:
+        example: pending
+        type: string
+      task_id:
+        example: 1
+        type: integer
+      title:
+        example: Task Reminder
+        type: string
+      trigger:
+        example: due_date
+        type: string
+      type:
+        example: email
+        type: string
+      updated_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      user_id:
+        example: 1
+        type: integer
+    type: object
+  api.PaginatedResponse:
+    properties:
+      data: {}
+      error:
+        example: ""
+        type: string
+      message:
+        example: Data retrieved successfully
+        type: string
+      pagination:
+        $ref: '#/definitions/api.Pagination'
+      success:
+        example: true
+        type: boolean
+    type: object
+  api.Pagination:
+    properties:
+      has_next:
+        example: true
+        type: boolean
+      has_prev:
+        example: false
+        type: boolean
+      page:
+        example: 1
+        type: integer
+      page_size:
+        example: 10
+        type: integer
+      total_items:
+        example: 100
+        type: integer
+      total_pages:
+        example: 10
+        type: integer
+    type: object
+  api.SearchRequest:
+    properties:
+      category_id:
+        example: 1
+        type: integer
+      created_after:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      due_before:
+        example: "2024-12-31T23:59:59Z"
+        type: string
+      page:
+        example: 1
+        type: integer
+      page_size:
+        example: 10
+        type: integer
+      priority:
+        example: 3
+        type: integer
+      query:
+        example: learn go
+        type: string
+      sort_by:
+        example: created_at
+        type: string
+      sort_order:
+        example: desc
+        type: string
+      status:
+        example: 0
+        type: integer
+      tag_names:
+        example:
+        - '["learning"'
+        - ' "programming"]'
+        items:
+          type: string
+        type: array
+    type: object
+  api.StatisticsResponse:
+    properties:
+      completed_tasks:
+        example: 75
+        type: integer
+      overdue_tasks:
+        example: 5
+        type: integer
+      pending_tasks:
+        example: 20
+        type: integer
+      total_categories:
+        example: 5
+        type: integer
+      total_tags:
+        example: 15
+        type: integer
+      total_tasks:
+        example: 100
+        type: integer
+      total_users:
+        example: 10
+        type: integer
+    type: object
+  api.TagRequest:
+    properties:
+      color:
+        example: '#ff0000'
+        type: string
+      name:
+        example: urgent
+        type: string
+    required:
+    - name
+    type: object
+  api.TagResponse:
+    properties:
+      color:
+        example: '#ff0000'
+        type: string
+      created_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: urgent
+        type: string
+    type: object
+  api.TaskRequest:
+    properties:
+      category_id:
+        example: 1
+        type: integer
+      description:
+        example: Study Go language fundamentals and best practices
+        type: string
+      due_date:
+        example: "2024-12-31T23:59:59Z"
+        type: string
+      priority:
+        example: 3
+        maximum: 5
+        minimum: 1
+        type: integer
+      status:
+        example: 0
+        maximum: 3
+        minimum: 0
+        type: integer
+      tag_names:
+        example:
+        - '["learning"'
+        - ' "programming"]'
+        items:
+          type: string
+        type: array
+      title:
+        example: Learn Go Programming
+        type: string
+    required:
+    - priority
+    - title
+    type: object
+  api.TaskResponse:
+    properties:
+      category:
+        $ref: '#/definitions/api.CategoryResponse'
+      created_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      description:
+        example: Study Go language fundamentals and best practices
+        type: string
+      due_date:
+        example: "2024-12-31T23:59:59Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      is_archived:
+        example: false
+        type: boolean
+      priority:
+        example: 3
+        type: integer
+      status:
+        example: 0
+        type: integer
+      tags:
+        items:
+          $ref: '#/definitions/api.TagResponse'
+        type: array
+      title:
+        example: Learn Go Programming
+        type: string
+      updated_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      user_id:
+        example: 1
+        type: integer
+    type: object
+  api.UserRequest:
+    properties:
+      email:
+        example: john@example.com
+        type: string
+      password:
+        example: password123
+        minLength: 6
+        type: string
+      username:
+        example: johndoe
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  api.UserResponse:
+    properties:
+      created_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      email:
+        example: john@example.com
+        type: string
+      id:
+        example: 1
+        type: integer
+      is_active:
+        example: true
+        type: boolean
+      updated_at:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      username:
+        example: johndoe
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: A comprehensive task management API built with Go, featuring user authentication,
+    task management, categories, tags, dependencies, search, export/import, and notifications.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Go Task Manager API
+  version: 1.0.0
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/api.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Login user
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account
+      parameters:
+      - description: User registration data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/api.UserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.UserResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Register a new user
+      tags:
+      - auth
+  /categories:
+    get:
+      consumes:
+      - application/json
+      description: Get all task categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.CategoryResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all categories
+      tags:
+      - categories
+    post:
+      consumes:
+      - application/json
+      description: Create a new task category
+      parameters:
+      - description: Category data
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/api.CategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.CategoryResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new category
+      tags:
+      - categories
+  /categories/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing category
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a category
+      tags:
+      - categories
+    get:
+      consumes:
+      - application/json
+      description: Get a category by ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.CategoryResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a specific category
+      tags:
+      - categories
+    put:
+      consumes:
+      - application/json
+      description: Update an existing category
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated category data
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/api.CategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.CategoryResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a category
+      tags:
+      - categories
+  /dependencies:
+    post:
+      consumes:
+      - application/json
+      description: Create a dependency between two tasks
+      parameters:
+      - description: Dependency data
+        in: body
+        name: dependency
+        required: true
+        schema:
+          $ref: '#/definitions/api.DependencyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.DependencyResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a task dependency
+      tags:
+      - dependencies
+  /dependencies/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a dependency between two tasks
+      parameters:
+      - description: Dependency ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a task dependency
+      tags:
+      - dependencies
+  /dependencies/task/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get all dependencies for a specific task
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.DependencyResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get task dependencies
+      tags:
+      - dependencies
+  /export/import:
+    post:
+      consumes:
+      - application/json
+      description: Import tasks from JSON or CSV format
+      parameters:
+      - description: Import options
+        in: body
+        name: import
+        required: true
+        schema:
+          $ref: '#/definitions/api.ImportRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Import tasks
+      tags:
+      - export
+  /export/tasks:
+    post:
+      consumes:
+      - application/json
+      description: Export tasks in JSON or CSV format
+      parameters:
+      - description: Export options
+        in: body
+        name: export
+        required: true
+        schema:
+          $ref: '#/definitions/api.ExportRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Export tasks
+      tags:
+      - export
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check the health status of the API
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.HealthResponse'
+      summary: Health check
+      tags:
+      - health
+  /notifications:
+    get:
+      consumes:
+      - application/json
+      description: Get all notifications for the authenticated user
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.PaginatedResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.NotificationResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user notifications
+      tags:
+      - notifications
+    post:
+      consumes:
+      - application/json
+      description: Create a new notification
+      parameters:
+      - description: Notification data
+        in: body
+        name: notification
+        required: true
+        schema:
+          $ref: '#/definitions/api.NotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.NotificationResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a notification
+      tags:
+      - notifications
+  /notifications/{id}/read:
+    put:
+      consumes:
+      - application/json
+      description: Mark a notification as read
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Mark notification as read
+      tags:
+      - notifications
+  /notifications/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get notification statistics for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get notification statistics
+      tags:
+      - notifications
+  /statistics:
+    get:
+      consumes:
+      - application/json
+      description: Get application statistics for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.StatisticsResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get statistics
+      tags:
+      - statistics
+  /tags:
+    get:
+      consumes:
+      - application/json
+      description: Get all task tags
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.APIResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.TagResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all tags
+      tags:
+      - tags
+    post:
+      consumes:
+      - application/json
+      description: Create a new task tag
+      parameters:
+      - description: Tag data
+        in: body
+        name: tag
+        required: true
+        schema:
+          $ref: '#/definitions/api.TagRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.TagResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new tag
+      tags:
+      - tags
+  /tags/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing tag
+      parameters:
+      - description: Tag ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a tag
+      tags:
+      - tags
+    get:
+      consumes:
+      - application/json
+      description: Get a tag by ID
+      parameters:
+      - description: Tag ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.TagResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a specific tag
+      tags:
+      - tags
+    put:
+      consumes:
+      - application/json
+      description: Update an existing tag
+      parameters:
+      - description: Tag ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated tag data
+        in: body
+        name: tag
+        required: true
+        schema:
+          $ref: '#/definitions/api.TagRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.TagResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a tag
+      tags:
+      - tags
+  /tasks:
+    get:
+      consumes:
+      - application/json
+      description: Get all tasks for the authenticated user
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Filter by status
+        in: query
+        name: status
+        type: integer
+      - description: Filter by priority
+        in: query
+        name: priority
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.PaginatedResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.TaskResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user tasks
+      tags:
+      - tasks
+    post:
+      consumes:
+      - application/json
+      description: Create a new task for the authenticated user
+      parameters:
+      - description: Task data
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/api.TaskRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.TaskResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new task
+      tags:
+      - tasks
+  /tasks/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a specific task
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a task
+      tags:
+      - tasks
+    get:
+      consumes:
+      - application/json
+      description: Get a task by ID for the authenticated user
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.TaskResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get a specific task
+      tags:
+      - tasks
+  /tasks/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: Update the status of a specific task
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New status
+        in: body
+        name: status
+        required: true
+        schema:
+          additionalProperties:
+            type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.APIResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/api.TaskResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update task status
+      tags:
+      - tasks
+  /tasks/search:
+    post:
+      consumes:
+      - application/json
+      description: Search tasks with various filters
+      parameters:
+      - description: Search criteria
+        in: body
+        name: search
+        required: true
+        schema:
+          $ref: '#/definitions/api.SearchRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/api.PaginatedResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/api.TaskResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Search tasks
+      tags:
+      - tasks
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

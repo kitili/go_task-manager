@@ -2,7 +2,6 @@ package task
 
 import (
 	"database/sql"
-	"time"
 	
 	"learn-go-capstone/internal/database"
 )
@@ -35,18 +34,6 @@ func (f *TaskManagerFactory) CreateTaskManager(storageType StorageType, db *sql.
 	}
 }
 
-// TaskManagerInterface defines the interface that all task managers must implement
-type TaskManagerInterface interface {
-	AddTask(title, description string, priority Priority, dueDate *time.Time) *Task
-	GetTask(id int) (*Task, error)
-	UpdateTaskStatus(id int, status Status) error
-	DeleteTask(id int) error
-	GetAllTasks() []Task
-	GetTasksByStatus(status Status) []Task
-	GetTasksByPriority(priority Priority) []Task
-	SortTasksByPriority() []Task
-	GetOverdueTasks() []Task
-}
 
 // Ensure TaskManager implements TaskManagerInterface
 var _ TaskManagerInterface = (*TaskManager)(nil)

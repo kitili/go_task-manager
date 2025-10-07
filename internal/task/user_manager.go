@@ -220,3 +220,34 @@ func (um *UserManager) GetUserOverdueTasks(userID int) ([]Task, error) {
 	
 	return userTasks, nil
 }
+
+// GetUserTask retrieves a specific task for a user, ensuring ownership
+func (um *UserManager) GetUserTask(userID, taskID int) (*Task, error) {
+	dbTask, err := um.repository.GetTask(taskID)
+	if err != nil {
+		return nil, err
+	}
+
+	if dbTask.UserID == nil || *dbTask.UserID != userID {
+		return nil, errors.New("access denied: task does not belong to user or user ID is missing")
+	}
+
+	task := convertFromDatabaseTask(dbTask)
+	return &task, nil
+}
+
+// UpdateUserTaskStatus updates the status of a user's task, ensuring ownership
+func (um *UserManager) UpdateUserTaskStatus(userID, taskID int, status Status) error {
+	dbTask, err := um.repository.GetTask(taskID)
+	if err != nil {
+		return err
+	}
+
+	if dbTask.UserID == nil || *dbTask.UserID != userID {
+		return errors.New("access denied: task does not belong to user or user ID is missing")
+	}
+
+	dbTask.Status = int(status)
+	dbTask.UpdatedAt = time.Now()
+	return um.repository.UpdateTask(dbTask)
+}
