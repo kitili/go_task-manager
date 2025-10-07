@@ -100,6 +100,11 @@ func (mm *MigrationManager) getMigrations() []Migration {
 			Name:    "add_archived_flag_to_tasks",
 			Run:     mm.addArchivedFlagToTasks,
 		},
+		{
+			Version: 9,
+			Name:    "create_task_dependencies_table",
+			Run:     mm.createTaskDependenciesTable,
+		},
 	}
 }
 
@@ -228,4 +233,20 @@ func (mm *MigrationManager) addArchivedFlagToTasks(db *sql.DB) error {
 	// This migration is already included in createTasksTable
 	// But we'll add it here for completeness in case we need to add it later
 	return nil
+}
+
+func (mm *MigrationManager) createTaskDependenciesTable(db *sql.DB) error {
+	query := `
+	CREATE TABLE IF NOT EXISTS task_dependencies (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		task_id INTEGER NOT NULL,
+		depends_on_task_id INTEGER NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+		FOREIGN KEY (depends_on_task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+		UNIQUE(task_id, depends_on_task_id)
+	)`
+	
+	_, err := db.Exec(query)
+	return err
 }

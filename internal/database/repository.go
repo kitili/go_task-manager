@@ -23,6 +23,14 @@ type Repository interface {
 	GetTasksByCategory(categoryID int) ([]DatabaseTask, error)
 	SearchTasks(query string) ([]DatabaseTask, error)
 	
+	// Task dependency operations (Phase 2)
+	AddTaskDependency(taskID, dependsOnTaskID int) error
+	RemoveTaskDependency(taskID, dependsOnTaskID int) error
+	GetTaskDependencies(taskID int) ([]TaskDependency, error)
+	GetTasksThatDependOn(taskID int) ([]DatabaseTask, error)
+	GetTasksThatTaskDependsOn(taskID int) ([]DatabaseTask, error)
+	CheckCircularDependency(taskID, dependsOnTaskID int) (bool, error)
+	
 	// Category operations (Phase 2)
 	CreateCategory(category *Category) error
 	GetCategory(id int) (*Category, error)
@@ -719,6 +727,191 @@ func (r *SQLiteRepository) GetTasksByTag(tagID int) ([]DatabaseTask, error) {
 	}
 	
 	return tasks, nil
+}
+
+// Task dependency operations (Phase 2)
+
+func (r *SQLiteRepository) AddTaskDependency(taskID, dependsOnTaskID int) error {
+	// Check for circular dependency before adding
+	hasCircular, err := r.CheckCircularDependency(taskID, dependsOnTaskID)
+	if err != nil {
+		return fmt.Errorf("failed to check circular dependency: %w", err)
+	}
+	
+	if hasCircular {
+		return fmt.Errorf("adding this dependency would create a circular dependency")
+	}
+	
+	query := `
+	INSERT INTO task_dependencies (task_id, depends_on_task_id)
+	VALUES (?, ?)`
+	
+	_, err = r.db.Exec(query, taskID, dependsOnTaskID)
+	if err != nil {
+		return fmt.Errorf("failed to add task dependency: %w", err)
+	}
+	
+	return nil
+}
+
+func (r *SQLiteRepository) RemoveTaskDependency(taskID, dependsOnTaskID int) error {
+	query := `DELETE FROM task_dependencies WHERE task_id = ? AND depends_on_task_id = ?`
+	
+	result, err := r.db.Exec(query, taskID, dependsOnTaskID)
+	if err != nil {
+		return fmt.Errorf("failed to remove task dependency: %w", err)
+	}
+	
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	
+	if rowsAffected == 0 {
+		return fmt.Errorf("task dependency not found")
+	}
+	
+	return nil
+}
+
+func (r *SQLiteRepository) GetTaskDependencies(taskID int) ([]TaskDependency, error) {
+	query := `
+	SELECT id, task_id, depends_on_task_id, created_at
+	FROM task_dependencies
+	WHERE task_id = ?
+	ORDER BY created_at ASC`
+	
+	rows, err := r.db.Query(query, taskID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get task dependencies: %w", err)
+	}
+	defer rows.Close()
+	
+	var dependencies []TaskDependency
+	for rows.Next() {
+		dep := TaskDependency{}
+		err := rows.Scan(
+			&dep.ID,
+			&dep.TaskID,
+			&dep.DependsOnTaskID,
+			&dep.CreatedAt,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan dependency: %w", err)
+		}
+		dependencies = append(dependencies, dep)
+	}
+	
+	return dependencies, nil
+}
+
+func (r *SQLiteRepository) GetTasksThatDependOn(taskID int) ([]DatabaseTask, error) {
+	query := `
+	SELECT t.id, t.title, t.description, t.priority, t.status, t.created_at, t.updated_at, t.due_date, t.user_id, t.category_id, t.is_archived
+	FROM tasks t
+	INNER JOIN task_dependencies td ON t.id = td.task_id
+	WHERE td.depends_on_task_id = ? AND t.is_archived = FALSE
+	ORDER BY t.created_at DESC`
+	
+	rows, err := r.db.Query(query, taskID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get tasks that depend on task: %w", err)
+	}
+	defer rows.Close()
+	
+	var tasks []DatabaseTask
+	for rows.Next() {
+		task := DatabaseTask{}
+		err := rows.Scan(
+			&task.ID,
+			&task.Title,
+			&task.Description,
+			&task.Priority,
+			&task.Status,
+			&task.CreatedAt,
+			&task.UpdatedAt,
+			&task.DueDate,
+			&task.UserID,
+			&task.CategoryID,
+			&task.IsArchived,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan task: %w", err)
+		}
+		tasks = append(tasks, task)
+	}
+	
+	return tasks, nil
+}
+
+func (r *SQLiteRepository) GetTasksThatTaskDependsOn(taskID int) ([]DatabaseTask, error) {
+	query := `
+	SELECT t.id, t.title, t.description, t.priority, t.status, t.created_at, t.updated_at, t.due_date, t.user_id, t.category_id, t.is_archived
+	FROM tasks t
+	INNER JOIN task_dependencies td ON t.id = td.depends_on_task_id
+	WHERE td.task_id = ? AND t.is_archived = FALSE
+	ORDER BY t.created_at DESC`
+	
+	rows, err := r.db.Query(query, taskID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get tasks that task depends on: %w", err)
+	}
+	defer rows.Close()
+	
+	var tasks []DatabaseTask
+	for rows.Next() {
+		task := DatabaseTask{}
+		err := rows.Scan(
+			&task.ID,
+			&task.Title,
+			&task.Description,
+			&task.Priority,
+			&task.Status,
+			&task.CreatedAt,
+			&task.UpdatedAt,
+			&task.DueDate,
+			&task.UserID,
+			&task.CategoryID,
+			&task.IsArchived,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan task: %w", err)
+		}
+		tasks = append(tasks, task)
+	}
+	
+	return tasks, nil
+}
+
+func (r *SQLiteRepository) CheckCircularDependency(taskID, dependsOnTaskID int) (bool, error) {
+	// If taskID == dependsOnTaskID, it's a direct circular dependency
+	if taskID == dependsOnTaskID {
+		return true, nil
+	}
+	
+	// Use a recursive CTE to check for circular dependencies
+	query := `
+	WITH RECURSIVE dependency_chain AS (
+		SELECT task_id, depends_on_task_id, 1 as depth
+		FROM task_dependencies
+		WHERE task_id = ?
+		
+		UNION ALL
+		
+		SELECT td.task_id, td.depends_on_task_id, dc.depth + 1
+		FROM task_dependencies td
+		INNER JOIN dependency_chain dc ON td.task_id = dc.depends_on_task_id
+		WHERE dc.depth < 10  -- Prevent infinite recursion
+	)
+	SELECT COUNT(*) FROM dependency_chain WHERE depends_on_task_id = ?`
+	
+	var count int
+	err := r.db.QueryRow(query, dependsOnTaskID, taskID).Scan(&count)
+	if err != nil {
+		return false, fmt.Errorf("failed to check circular dependency: %w", err)
+	}
+	
+	return count > 0, nil
 }
 
 // User operations (Phase 5)

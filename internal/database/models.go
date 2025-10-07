@@ -44,6 +44,14 @@ type TaskTag struct {
 	TagID  int `json:"tag_id" db:"tag_id"`
 }
 
+// TaskDependency represents a dependency relationship between tasks
+type TaskDependency struct {
+	ID               int       `json:"id" db:"id"`
+	TaskID           int       `json:"task_id" db:"task_id"`
+	DependsOnTaskID  int       `json:"depends_on_task_id" db:"depends_on_task_id"`
+	CreatedAt        time.Time `json:"created_at" db:"created_at"`
+}
+
 // User represents system users (Phase 5)
 type User struct {
 	ID        int       `json:"id" db:"id"`
