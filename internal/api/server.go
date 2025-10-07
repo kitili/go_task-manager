@@ -54,10 +54,15 @@ func NewServer(
 		authService,
 	)
 
-	return &Server{
+	server := &Server{
 		router:  router,
 		handler: handler,
 	}
+	
+	// Setup routes
+	server.SetupRoutes()
+	
+	return server
 }
 
 // SetupRoutes sets up all the API routes

@@ -340,7 +340,7 @@ func demonstratePanicRecover() {
 	fmt.Println()
 }
 
-func main() {
+func mainAdvanced() {
 	fmt.Println("🚀 Go Learning Examples - Advanced Concepts")
 	fmt.Println("===========================================")
 	fmt.Println()

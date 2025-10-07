@@ -1,0 +1,35 @@
+# Test Configuration for Go Task Manager
+
+# Database Configuration
+TEST_DB_DRIVER=sqlite3
+TEST_DB_DSN=file:test_task_manager.db?mode=memory&cache=shared
+
+# Test Settings
+TEST_TIMEOUT=30s
+TEST_PARALLEL=4
+TEST_RACE_DETECTOR=true
+TEST_COVERAGE_THRESHOLD=80
+
+# Performance Test Settings
+PERF_NUM_TASKS=10000
+PERF_NUM_GOROUTINES=10
+PERF_NUM_OPERATIONS=100
+
+# API Test Settings
+API_TEST_TIMEOUT=10s
+API_TEST_BASE_URL=http://localhost:8080
+API_TEST_RATE_LIMIT=100
+
+# Benchmark Settings
+BENCHMARK_TIME=30s
+BENCHMARK_MEMORY=true
+BENCHMARK_CPU=true
+
+# Test Data
+TEST_USER_USERNAME=testuser
+TEST_USER_EMAIL=test@example.com
+TEST_USER_PASSWORD=password123
+
+# Logging
+TEST_LOG_LEVEL=info
+TEST_LOG_FORMAT=json

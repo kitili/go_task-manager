@@ -322,12 +322,11 @@ func handleHome(w http.ResponseWriter, r *http.Request) {
             .then(response => response.json())
             .then(data => {
                 if (data.length === 0) {
-                    document.getElementById('tasks').innerHTML = `
-                        <div class="empty-state">
-                            <h3>No tasks yet</h3>
-                            <p>Add your first task using the form above!</p>
-                        </div>
-                    `;
+                    document.getElementById('tasks').innerHTML = 
+                        '<div class="empty-state">' +
+                            '<h3>No tasks yet</h3>' +
+                            '<p>Add your first task using the form above!</p>' +
+                        '</div>';
                     return;
                 }
 
@@ -355,7 +354,7 @@ func handleHome(w http.ResponseWriter, r *http.Request) {
 
         // Update task status
         function updateTask(id, status) {
-            fetch(`/api/tasks/${id}`, {
+            fetch('/api/tasks/' + id, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -376,7 +375,7 @@ func handleHome(w http.ResponseWriter, r *http.Request) {
         // Delete task
         function deleteTask(id) {
             if (confirm('Are you sure you want to delete this task?')) {
-                fetch(`/api/tasks/${id}`, {
+                fetch('/api/tasks/' + id, {
                     method: 'DELETE'
                 })
                 .then(response => response.json())
@@ -523,4 +522,55 @@ func handleStats(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(stats)
+}
+
+func handleUpdateTask(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		ID     int `json:"id"`
+		Status int `json:"status"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	err := taskManager.UpdateTaskStatus(req.ID, task.Status(req.Status))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"message": "Task updated successfully"})
+}
+
+func handleDeleteTask(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		ID int `json:"id"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	err := taskManager.DeleteTask(req.ID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"message": "Task deleted successfully"})
 }

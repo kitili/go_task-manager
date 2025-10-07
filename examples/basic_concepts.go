@@ -159,7 +159,7 @@ func demonstrateInterfaces() {
 	}
 	
 	// Interface with multiple methods
-	var writer Writer = &ConsoleWriter{}
+	var writer BasicWriter = &ConsoleWriter{}
 	writer.Write([]byte("Hello from interface!"))
 	
 	fmt.Println()
@@ -195,7 +195,7 @@ func (r Rectangle) Perimeter() float64 {
 	return 2 * (r.Width + r.Height)
 }
 
-type Writer interface {
+type BasicWriter interface {
 	Write([]byte) (int, error)
 }
 
