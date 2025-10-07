@@ -11,7 +11,7 @@ import (
 )
 
 // HandleCommand processes command line arguments
-func HandleCommand(args []string, tm *task.TaskManager) {
+func HandleCommand(args []string, tm task.TaskManagerInterface) {
 	if len(args) == 0 {
 		return
 	}
@@ -39,7 +39,7 @@ func HandleCommand(args []string, tm *task.TaskManager) {
 	}
 }
 
-func handleAddCommand(args []string, tm *task.TaskManager) {
+func handleAddCommand(args []string, tm task.TaskManagerInterface) {
 	if len(args) < 2 {
 		color.Red("❌ Usage: go run main.go add <title> <description> [priority] [due_date]")
 		color.White("Priority: 1=Low, 2=Medium, 3=High, 4=Urgent")
@@ -70,7 +70,7 @@ func handleAddCommand(args []string, tm *task.TaskManager) {
 		newTask.ID, newTask.Title, newTask.Priority.String())
 }
 
-func handleListCommand(args []string, tm *task.TaskManager) {
+func handleListCommand(args []string, tm task.TaskManagerInterface) {
 	tasks := tm.GetAllTasks()
 	
 	if len(tasks) == 0 {
@@ -119,7 +119,7 @@ func handleListCommand(args []string, tm *task.TaskManager) {
 	}
 }
 
-func handleUpdateCommand(args []string, tm *task.TaskManager) {
+func handleUpdateCommand(args []string, tm task.TaskManagerInterface) {
 	if len(args) < 2 {
 		color.Red("❌ Usage: go run main.go update <task_id> <status>")
 		color.White("Status: pending, in-progress, completed, cancelled")
@@ -158,7 +158,7 @@ func handleUpdateCommand(args []string, tm *task.TaskManager) {
 	color.Green("✅ Task status updated successfully!")
 }
 
-func handleDeleteCommand(args []string, tm *task.TaskManager) {
+func handleDeleteCommand(args []string, tm task.TaskManagerInterface) {
 	if len(args) < 1 {
 		color.Red("❌ Usage: go run main.go delete <task_id>")
 		return
@@ -179,7 +179,7 @@ func handleDeleteCommand(args []string, tm *task.TaskManager) {
 	color.Green("✅ Task deleted successfully!")
 }
 
-func handleStatsCommand(tm *task.TaskManager) {
+func handleStatsCommand(tm task.TaskManagerInterface) {
 	allTasks := tm.GetAllTasks()
 	
 	if len(allTasks) == 0 {
@@ -221,7 +221,7 @@ func handleStatsCommand(tm *task.TaskManager) {
 	fmt.Printf("\nOverdue Tasks: %d\n", overdue)
 }
 
-func handleDemoCommand(tm *task.TaskManager) {
+func handleDemoCommand(tm task.TaskManagerInterface) {
 	color.Cyan("🔄 Go Concurrency Demo")
 	fmt.Println("Adding demo tasks using goroutines and channels...")
 	

@@ -26,7 +26,7 @@ func DisplayWelcome() {
 }
 
 // RunInteractiveMode starts the interactive CLI
-func RunInteractiveMode(tm *task.TaskManager) error {
+func RunInteractiveMode(tm task.TaskManagerInterface) error {
 	scanner := bufio.NewScanner(os.Stdin)
 	
 	for {
@@ -85,7 +85,7 @@ func displayMenu() {
 	fmt.Println("0. Exit")
 }
 
-func addTaskInteractive(tm *task.TaskManager, scanner *bufio.Scanner) {
+func addTaskInteractive(tm task.TaskManagerInterface, scanner *bufio.Scanner) {
 	fmt.Print("Enter task title: ")
 	scanner.Scan()
 	title := strings.TrimSpace(scanner.Text())
@@ -140,7 +140,7 @@ func getPriorityFromUser(scanner *bufio.Scanner) task.Priority {
 	}
 }
 
-func listTasks(tm *task.TaskManager) {
+func listTasks(tm task.TaskManagerInterface) {
 	tasks := tm.GetAllTasks()
 	if len(tasks) == 0 {
 		color.Yellow("📝 No tasks found.")
@@ -212,7 +212,7 @@ func getStatusColor(s task.Status) func(string) string {
 	}
 }
 
-func updateTaskStatus(tm *task.TaskManager, scanner *bufio.Scanner) {
+func updateTaskStatus(tm task.TaskManagerInterface, scanner *bufio.Scanner) {
 	fmt.Print("Enter task ID: ")
 	scanner.Scan()
 	idStr := strings.TrimSpace(scanner.Text())
@@ -257,7 +257,7 @@ func updateTaskStatus(tm *task.TaskManager, scanner *bufio.Scanner) {
 	color.Green("✅ Task status updated successfully!")
 }
 
-func deleteTask(tm *task.TaskManager, scanner *bufio.Scanner) {
+func deleteTask(tm task.TaskManagerInterface, scanner *bufio.Scanner) {
 	fmt.Print("Enter task ID to delete: ")
 	scanner.Scan()
 	idStr := strings.TrimSpace(scanner.Text())
@@ -277,7 +277,7 @@ func deleteTask(tm *task.TaskManager, scanner *bufio.Scanner) {
 	color.Green("✅ Task deleted successfully!")
 }
 
-func listTasksByStatus(tm *task.TaskManager, scanner *bufio.Scanner) {
+func listTasksByStatus(tm task.TaskManagerInterface, scanner *bufio.Scanner) {
 	fmt.Print("Enter status (1=Pending, 2=In Progress, 3=Completed, 4=Cancelled): ")
 	scanner.Scan()
 	statusStr := strings.TrimSpace(scanner.Text())
@@ -301,7 +301,7 @@ func listTasksByStatus(tm *task.TaskManager, scanner *bufio.Scanner) {
 	displayTasksTable(tasks, fmt.Sprintf("Tasks with Status: %s", status.String()))
 }
 
-func listTasksByPriority(tm *task.TaskManager, scanner *bufio.Scanner) {
+func listTasksByPriority(tm task.TaskManagerInterface, scanner *bufio.Scanner) {
 	fmt.Print("Enter priority (1=Low, 2=Medium, 3=High, 4=Urgent): ")
 	scanner.Scan()
 	priorityStr := strings.TrimSpace(scanner.Text())
@@ -325,12 +325,12 @@ func listTasksByPriority(tm *task.TaskManager, scanner *bufio.Scanner) {
 	displayTasksTable(tasks, fmt.Sprintf("Tasks with Priority: %s", priority.String()))
 }
 
-func listOverdueTasks(tm *task.TaskManager) {
+func listOverdueTasks(tm task.TaskManagerInterface) {
 	tasks := tm.GetOverdueTasks()
 	displayTasksTable(tasks, "Overdue Tasks")
 }
 
-func showStatistics(tm *task.TaskManager) {
+func showStatistics(tm task.TaskManagerInterface) {
 	allTasks := tm.GetAllTasks()
 	
 	if len(allTasks) == 0 {
@@ -373,7 +373,7 @@ func showStatistics(tm *task.TaskManager) {
 }
 
 // runConcurrencyDemo demonstrates Go's concurrency features
-func runConcurrencyDemo(tm *task.TaskManager) {
+func runConcurrencyDemo(tm task.TaskManagerInterface) {
 	color.Cyan("\n🔄 Go Concurrency Demo")
 	fmt.Println("This demo shows goroutines and channels in action...")
 	
