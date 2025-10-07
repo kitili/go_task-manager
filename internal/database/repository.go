@@ -22,6 +22,9 @@ type Repository interface {
 	GetTasksByUser(userID int) ([]DatabaseTask, error)
 	GetTasksByCategory(categoryID int) ([]DatabaseTask, error)
 	SearchTasks(query string) ([]DatabaseTask, error)
+	SearchTasksByUser(userID int, query string) ([]DatabaseTask, error)
+	SearchTasksByTag(tagName string) ([]DatabaseTask, error)
+	SearchTasksByCategory(categoryName string) ([]DatabaseTask, error)
 	
 	// Task dependency operations (Phase 2)
 	AddTaskDependency(taskID, dependsOnTaskID int) error
@@ -424,8 +427,179 @@ func (r *SQLiteRepository) GetTasksByUser(userID int) ([]DatabaseTask, error) {
 }
 
 func (r *SQLiteRepository) SearchTasks(query string) ([]DatabaseTask, error) {
-	// TODO: Implement in Phase 6
-	return nil, fmt.Errorf("not implemented yet")
+	searchQuery := "%" + query + "%"
+	sqlQuery := `
+	SELECT t.id, t.title, t.description, t.priority, t.status, t.created_at, t.updated_at, t.due_date, t.user_id, t.category_id, t.is_archived
+	FROM tasks t
+	WHERE t.is_archived = FALSE 
+	AND (t.title LIKE ? OR t.description LIKE ?)
+	ORDER BY 
+		CASE 
+			WHEN t.title LIKE ? THEN 1
+			WHEN t.description LIKE ? THEN 2
+			ELSE 3
+		END,
+		t.created_at DESC`
+	
+	rows, err := r.db.Query(sqlQuery, searchQuery, searchQuery, searchQuery, searchQuery)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search tasks: %w", err)
+	}
+	defer rows.Close()
+	
+	var tasks []DatabaseTask
+	for rows.Next() {
+		task := DatabaseTask{}
+		err := rows.Scan(
+			&task.ID,
+			&task.Title,
+			&task.Description,
+			&task.Priority,
+			&task.Status,
+			&task.CreatedAt,
+			&task.UpdatedAt,
+			&task.DueDate,
+			&task.UserID,
+			&task.CategoryID,
+			&task.IsArchived,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan task: %w", err)
+		}
+		tasks = append(tasks, task)
+	}
+	
+	return tasks, nil
+}
+
+// SearchTasksByUser searches tasks for a specific user
+func (r *SQLiteRepository) SearchTasksByUser(userID int, query string) ([]DatabaseTask, error) {
+	searchQuery := "%" + query + "%"
+	sqlQuery := `
+	SELECT t.id, t.title, t.description, t.priority, t.status, t.created_at, t.updated_at, t.due_date, t.user_id, t.category_id, t.is_archived
+	FROM tasks t
+	WHERE t.user_id = ? AND t.is_archived = FALSE 
+	AND (t.title LIKE ? OR t.description LIKE ?)
+	ORDER BY 
+		CASE 
+			WHEN t.title LIKE ? THEN 1
+			WHEN t.description LIKE ? THEN 2
+			ELSE 3
+		END,
+		t.created_at DESC`
+	
+	rows, err := r.db.Query(sqlQuery, userID, searchQuery, searchQuery, searchQuery, searchQuery)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search user tasks: %w", err)
+	}
+	defer rows.Close()
+	
+	var tasks []DatabaseTask
+	for rows.Next() {
+		task := DatabaseTask{}
+		err := rows.Scan(
+			&task.ID,
+			&task.Title,
+			&task.Description,
+			&task.Priority,
+			&task.Status,
+			&task.CreatedAt,
+			&task.UpdatedAt,
+			&task.DueDate,
+			&task.UserID,
+			&task.CategoryID,
+			&task.IsArchived,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan task: %w", err)
+		}
+		tasks = append(tasks, task)
+	}
+	
+	return tasks, nil
+}
+
+// SearchTasksByTag searches tasks by tag name
+func (r *SQLiteRepository) SearchTasksByTag(tagName string) ([]DatabaseTask, error) {
+	searchQuery := "%" + tagName + "%"
+	sqlQuery := `
+	SELECT DISTINCT t.id, t.title, t.description, t.priority, t.status, t.created_at, t.updated_at, t.due_date, t.user_id, t.category_id, t.is_archived
+	FROM tasks t
+	INNER JOIN task_tags tt ON t.id = tt.task_id
+	INNER JOIN tags tg ON tt.tag_id = tg.id
+	WHERE t.is_archived = FALSE AND tg.name LIKE ?
+	ORDER BY t.created_at DESC`
+	
+	rows, err := r.db.Query(sqlQuery, searchQuery)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search tasks by tag: %w", err)
+	}
+	defer rows.Close()
+	
+	var tasks []DatabaseTask
+	for rows.Next() {
+		task := DatabaseTask{}
+		err := rows.Scan(
+			&task.ID,
+			&task.Title,
+			&task.Description,
+			&task.Priority,
+			&task.Status,
+			&task.CreatedAt,
+			&task.UpdatedAt,
+			&task.DueDate,
+			&task.UserID,
+			&task.CategoryID,
+			&task.IsArchived,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan task: %w", err)
+		}
+		tasks = append(tasks, task)
+	}
+	
+	return tasks, nil
+}
+
+// SearchTasksByCategory searches tasks by category name
+func (r *SQLiteRepository) SearchTasksByCategory(categoryName string) ([]DatabaseTask, error) {
+	searchQuery := "%" + categoryName + "%"
+	sqlQuery := `
+	SELECT t.id, t.title, t.description, t.priority, t.status, t.created_at, t.updated_at, t.due_date, t.user_id, t.category_id, t.is_archived
+	FROM tasks t
+	INNER JOIN categories c ON t.category_id = c.id
+	WHERE t.is_archived = FALSE AND c.name LIKE ?
+	ORDER BY t.created_at DESC`
+	
+	rows, err := r.db.Query(sqlQuery, searchQuery)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search tasks by category: %w", err)
+	}
+	defer rows.Close()
+	
+	var tasks []DatabaseTask
+	for rows.Next() {
+		task := DatabaseTask{}
+		err := rows.Scan(
+			&task.ID,
+			&task.Title,
+			&task.Description,
+			&task.Priority,
+			&task.Status,
+			&task.CreatedAt,
+			&task.UpdatedAt,
+			&task.DueDate,
+			&task.UserID,
+			&task.CategoryID,
+			&task.IsArchived,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan task: %w", err)
+		}
+		tasks = append(tasks, task)
+	}
+	
+	return tasks, nil
 }
 
 // Category operations (Phase 2)
