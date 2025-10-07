@@ -347,14 +347,80 @@ func (r *SQLiteRepository) GetOverdueTasks() ([]DatabaseTask, error) {
 // Placeholder implementations for future phases
 // These will be implemented when we reach the respective phases
 
-func (r *SQLiteRepository) GetTasksByUser(userID int) ([]DatabaseTask, error) {
-	// TODO: Implement in Phase 5
-	return nil, fmt.Errorf("not implemented yet")
+func (r *SQLiteRepository) GetTasksByCategory(categoryID int) ([]DatabaseTask, error) {
+	query := `
+	SELECT t.id, t.title, t.description, t.priority, t.status, t.created_at, t.updated_at, t.due_date, t.user_id, t.category_id, t.is_archived
+	FROM tasks t
+	WHERE t.category_id = ? AND t.is_archived = FALSE
+	ORDER BY t.created_at DESC`
+	
+	rows, err := r.db.Query(query, categoryID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get tasks by category: %w", err)
+	}
+	defer rows.Close()
+	
+	var tasks []DatabaseTask
+	for rows.Next() {
+		task := DatabaseTask{}
+		err := rows.Scan(
+			&task.ID,
+			&task.Title,
+			&task.Description,
+			&task.Priority,
+			&task.Status,
+			&task.CreatedAt,
+			&task.UpdatedAt,
+			&task.DueDate,
+			&task.UserID,
+			&task.CategoryID,
+			&task.IsArchived,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan task: %w", err)
+		}
+		tasks = append(tasks, task)
+	}
+	
+	return tasks, nil
 }
 
-func (r *SQLiteRepository) GetTasksByCategory(categoryID int) ([]DatabaseTask, error) {
-	// TODO: Implement in Phase 2
-	return nil, fmt.Errorf("not implemented yet")
+func (r *SQLiteRepository) GetTasksByUser(userID int) ([]DatabaseTask, error) {
+	query := `
+	SELECT t.id, t.title, t.description, t.priority, t.status, t.created_at, t.updated_at, t.due_date, t.user_id, t.category_id, t.is_archived
+	FROM tasks t
+	WHERE t.user_id = ? AND t.is_archived = FALSE
+	ORDER BY t.created_at DESC`
+	
+	rows, err := r.db.Query(query, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get tasks by user: %w", err)
+	}
+	defer rows.Close()
+	
+	var tasks []DatabaseTask
+	for rows.Next() {
+		task := DatabaseTask{}
+		err := rows.Scan(
+			&task.ID,
+			&task.Title,
+			&task.Description,
+			&task.Priority,
+			&task.Status,
+			&task.CreatedAt,
+			&task.UpdatedAt,
+			&task.DueDate,
+			&task.UserID,
+			&task.CategoryID,
+			&task.IsArchived,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan task: %w", err)
+		}
+		tasks = append(tasks, task)
+	}
+	
+	return tasks, nil
 }
 
 func (r *SQLiteRepository) SearchTasks(query string) ([]DatabaseTask, error) {
@@ -914,38 +980,194 @@ func (r *SQLiteRepository) CheckCircularDependency(taskID, dependsOnTaskID int) 
 	return count > 0, nil
 }
 
-// User operations (Phase 5)
+// User operations (Phase 2)
+
 func (r *SQLiteRepository) CreateUser(user *User) error {
-	// TODO: Implement in Phase 5
-	return fmt.Errorf("not implemented yet")
+	query := `
+	INSERT INTO users (username, email, password, is_active)
+	VALUES (?, ?, ?, ?)`
+	
+	result, err := r.db.Exec(query,
+		user.Username,
+		user.Email,
+		user.Password,
+		user.IsActive,
+	)
+	
+	if err != nil {
+		return fmt.Errorf("failed to create user: %w", err)
+	}
+	
+	id, err := result.LastInsertId()
+	if err != nil {
+		return fmt.Errorf("failed to get user ID: %w", err)
+	}
+	
+	user.ID = int(id)
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
+	
+	return nil
 }
 
 func (r *SQLiteRepository) GetUser(id int) (*User, error) {
-	// TODO: Implement in Phase 5
-	return nil, fmt.Errorf("not implemented yet")
+	query := `
+	SELECT id, username, email, password, is_active, created_at, updated_at
+	FROM users WHERE id = ?`
+	
+	user := &User{}
+	err := r.db.QueryRow(query, id).Scan(
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&user.Password,
+		&user.IsActive,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("user with ID %d not found", id)
+		}
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+	
+	return user, nil
 }
 
 func (r *SQLiteRepository) GetUserByUsername(username string) (*User, error) {
-	// TODO: Implement in Phase 5
-	return nil, fmt.Errorf("not implemented yet")
+	query := `
+	SELECT id, username, email, password, is_active, created_at, updated_at
+	FROM users WHERE username = ?`
+	
+	user := &User{}
+	err := r.db.QueryRow(query, username).Scan(
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&user.Password,
+		&user.IsActive,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("user with username %s not found", username)
+		}
+		return nil, fmt.Errorf("failed to get user by username: %w", err)
+	}
+	
+	return user, nil
 }
 
 func (r *SQLiteRepository) GetUserByEmail(email string) (*User, error) {
-	// TODO: Implement in Phase 5
-	return nil, fmt.Errorf("not implemented yet")
+	query := `
+	SELECT id, username, email, password, is_active, created_at, updated_at
+	FROM users WHERE email = ?`
+	
+	user := &User{}
+	err := r.db.QueryRow(query, email).Scan(
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&user.Password,
+		&user.IsActive,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("user with email %s not found", email)
+		}
+		return nil, fmt.Errorf("failed to get user by email: %w", err)
+	}
+	
+	return user, nil
 }
 
 func (r *SQLiteRepository) UpdateUser(user *User) error {
-	// TODO: Implement in Phase 5
-	return fmt.Errorf("not implemented yet")
+	query := `
+	UPDATE users 
+	SET username = ?, email = ?, password = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP
+	WHERE id = ?`
+	
+	result, err := r.db.Exec(query,
+		user.Username,
+		user.Email,
+		user.Password,
+		user.IsActive,
+		user.ID,
+	)
+	
+	if err != nil {
+		return fmt.Errorf("failed to update user: %w", err)
+	}
+	
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	
+	if rowsAffected == 0 {
+		return fmt.Errorf("user with ID %d not found", user.ID)
+	}
+	
+	user.UpdatedAt = time.Now()
+	return nil
 }
 
 func (r *SQLiteRepository) DeleteUser(id int) error {
-	// TODO: Implement in Phase 5
-	return fmt.Errorf("not implemented yet")
+	query := `DELETE FROM users WHERE id = ?`
+	
+	result, err := r.db.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("failed to delete user: %w", err)
+	}
+	
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	
+	if rowsAffected == 0 {
+		return fmt.Errorf("user with ID %d not found", id)
+	}
+	
+	return nil
 }
 
 func (r *SQLiteRepository) GetAllUsers() ([]User, error) {
-	// TODO: Implement in Phase 5
-	return nil, fmt.Errorf("not implemented yet")
+	query := `
+	SELECT id, username, email, password, is_active, created_at, updated_at
+	FROM users 
+	ORDER BY created_at DESC`
+	
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get users: %w", err)
+	}
+	defer rows.Close()
+	
+	var users []User
+	for rows.Next() {
+		user := User{}
+		err := rows.Scan(
+			&user.ID,
+			&user.Username,
+			&user.Email,
+			&user.Password,
+			&user.IsActive,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan user: %w", err)
+		}
+		users = append(users, user)
+	}
+	
+	return users, nil
 }
