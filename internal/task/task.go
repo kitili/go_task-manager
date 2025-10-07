@@ -37,6 +37,27 @@ type Task struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 	DueDate     *time.Time `json:"due_date,omitempty"`
+	// Phase 2: Enhanced data model
+	Category    *Category `json:"category,omitempty"`
+	Tags        []Tag     `json:"tags,omitempty"`
+}
+
+// Category represents a task category
+type Category struct {
+	ID          int       `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Color       string    `json:"color"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+// Tag represents a task tag
+type Tag struct {
+	ID        int       `json:"id"`
+	Name      string    `json:"name"`
+	Color     string    `json:"color"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 // TaskManager manages a collection of tasks

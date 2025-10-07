@@ -356,75 +356,369 @@ func (r *SQLiteRepository) SearchTasks(query string) ([]DatabaseTask, error) {
 
 // Category operations (Phase 2)
 func (r *SQLiteRepository) CreateCategory(category *Category) error {
-	// TODO: Implement in Phase 2
-	return fmt.Errorf("not implemented yet")
+	query := `
+	INSERT INTO categories (name, description, color)
+	VALUES (?, ?, ?)`
+	
+	result, err := r.db.Exec(query, 
+		category.Name, 
+		category.Description, 
+		category.Color)
+	
+	if err != nil {
+		return fmt.Errorf("failed to create category: %w", err)
+	}
+	
+	id, err := result.LastInsertId()
+	if err != nil {
+		return fmt.Errorf("failed to get category ID: %w", err)
+	}
+	
+	category.ID = int(id)
+	category.CreatedAt = time.Now()
+	category.UpdatedAt = time.Now()
+	
+	return nil
 }
 
 func (r *SQLiteRepository) GetCategory(id int) (*Category, error) {
-	// TODO: Implement in Phase 2
-	return nil, fmt.Errorf("not implemented yet")
+	query := `
+	SELECT id, name, description, color, created_at, updated_at
+	FROM categories WHERE id = ?`
+	
+	category := &Category{}
+	err := r.db.QueryRow(query, id).Scan(
+		&category.ID,
+		&category.Name,
+		&category.Description,
+		&category.Color,
+		&category.CreatedAt,
+		&category.UpdatedAt,
+	)
+	
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("category with ID %d not found", id)
+		}
+		return nil, fmt.Errorf("failed to get category: %w", err)
+	}
+	
+	return category, nil
 }
 
 func (r *SQLiteRepository) GetAllCategories() ([]Category, error) {
-	// TODO: Implement in Phase 2
-	return nil, fmt.Errorf("not implemented yet")
+	query := `
+	SELECT id, name, description, color, created_at, updated_at
+	FROM categories 
+	ORDER BY name ASC`
+	
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get categories: %w", err)
+	}
+	defer rows.Close()
+	
+	var categories []Category
+	for rows.Next() {
+		category := Category{}
+		err := rows.Scan(
+			&category.ID,
+			&category.Name,
+			&category.Description,
+			&category.Color,
+			&category.CreatedAt,
+			&category.UpdatedAt,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan category: %w", err)
+		}
+		categories = append(categories, category)
+	}
+	
+	return categories, nil
 }
 
 func (r *SQLiteRepository) UpdateCategory(category *Category) error {
-	// TODO: Implement in Phase 2
-	return fmt.Errorf("not implemented yet")
+	query := `
+	UPDATE categories 
+	SET name = ?, description = ?, color = ?, updated_at = ?
+	WHERE id = ?`
+	
+	category.UpdatedAt = time.Now()
+	
+	result, err := r.db.Exec(query,
+		category.Name,
+		category.Description,
+		category.Color,
+		category.UpdatedAt,
+		category.ID,
+	)
+	
+	if err != nil {
+		return fmt.Errorf("failed to update category: %w", err)
+	}
+	
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	
+	if rowsAffected == 0 {
+		return fmt.Errorf("category with ID %d not found", category.ID)
+	}
+	
+	return nil
 }
 
 func (r *SQLiteRepository) DeleteCategory(id int) error {
-	// TODO: Implement in Phase 2
-	return fmt.Errorf("not implemented yet")
+	query := `DELETE FROM categories WHERE id = ?`
+	
+	result, err := r.db.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("failed to delete category: %w", err)
+	}
+	
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	
+	if rowsAffected == 0 {
+		return fmt.Errorf("category with ID %d not found", id)
+	}
+	
+	return nil
 }
 
 // Tag operations (Phase 2)
 func (r *SQLiteRepository) CreateTag(tag *Tag) error {
-	// TODO: Implement in Phase 2
-	return fmt.Errorf("not implemented yet")
+	query := `
+	INSERT INTO tags (name, color)
+	VALUES (?, ?)`
+	
+	result, err := r.db.Exec(query, 
+		tag.Name, 
+		tag.Color)
+	
+	if err != nil {
+		return fmt.Errorf("failed to create tag: %w", err)
+	}
+	
+	id, err := result.LastInsertId()
+	if err != nil {
+		return fmt.Errorf("failed to get tag ID: %w", err)
+	}
+	
+	tag.ID = int(id)
+	tag.CreatedAt = time.Now()
+	
+	return nil
 }
 
 func (r *SQLiteRepository) GetTag(id int) (*Tag, error) {
-	// TODO: Implement in Phase 2
-	return nil, fmt.Errorf("not implemented yet")
+	query := `
+	SELECT id, name, color, created_at
+	FROM tags WHERE id = ?`
+	
+	tag := &Tag{}
+	err := r.db.QueryRow(query, id).Scan(
+		&tag.ID,
+		&tag.Name,
+		&tag.Color,
+		&tag.CreatedAt,
+	)
+	
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("tag with ID %d not found", id)
+		}
+		return nil, fmt.Errorf("failed to get tag: %w", err)
+	}
+	
+	return tag, nil
 }
 
 func (r *SQLiteRepository) GetAllTags() ([]Tag, error) {
-	// TODO: Implement in Phase 2
-	return nil, fmt.Errorf("not implemented yet")
+	query := `
+	SELECT id, name, color, created_at
+	FROM tags 
+	ORDER BY name ASC`
+	
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get tags: %w", err)
+	}
+	defer rows.Close()
+	
+	var tags []Tag
+	for rows.Next() {
+		tag := Tag{}
+		err := rows.Scan(
+			&tag.ID,
+			&tag.Name,
+			&tag.Color,
+			&tag.CreatedAt,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan tag: %w", err)
+		}
+		tags = append(tags, tag)
+	}
+	
+	return tags, nil
 }
 
 func (r *SQLiteRepository) UpdateTag(tag *Tag) error {
-	// TODO: Implement in Phase 2
-	return fmt.Errorf("not implemented yet")
+	query := `
+	UPDATE tags 
+	SET name = ?, color = ?
+	WHERE id = ?`
+	
+	result, err := r.db.Exec(query,
+		tag.Name,
+		tag.Color,
+		tag.ID,
+	)
+	
+	if err != nil {
+		return fmt.Errorf("failed to update tag: %w", err)
+	}
+	
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	
+	if rowsAffected == 0 {
+		return fmt.Errorf("tag with ID %d not found", tag.ID)
+	}
+	
+	return nil
 }
 
 func (r *SQLiteRepository) DeleteTag(id int) error {
-	// TODO: Implement in Phase 2
-	return fmt.Errorf("not implemented yet")
+	query := `DELETE FROM tags WHERE id = ?`
+	
+	result, err := r.db.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("failed to delete tag: %w", err)
+	}
+	
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	
+	if rowsAffected == 0 {
+		return fmt.Errorf("tag with ID %d not found", id)
+	}
+	
+	return nil
 }
 
 // Task-Tag relationship operations (Phase 2)
 func (r *SQLiteRepository) AddTagToTask(taskID, tagID int) error {
-	// TODO: Implement in Phase 2
-	return fmt.Errorf("not implemented yet")
+	query := `
+	INSERT INTO task_tags (task_id, tag_id)
+	VALUES (?, ?)`
+	
+	_, err := r.db.Exec(query, taskID, tagID)
+	if err != nil {
+		return fmt.Errorf("failed to add tag to task: %w", err)
+	}
+	
+	return nil
 }
 
 func (r *SQLiteRepository) RemoveTagFromTask(taskID, tagID int) error {
-	// TODO: Implement in Phase 2
-	return fmt.Errorf("not implemented yet")
+	query := `DELETE FROM task_tags WHERE task_id = ? AND tag_id = ?`
+	
+	result, err := r.db.Exec(query, taskID, tagID)
+	if err != nil {
+		return fmt.Errorf("failed to remove tag from task: %w", err)
+	}
+	
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	
+	if rowsAffected == 0 {
+		return fmt.Errorf("tag-task relationship not found")
+	}
+	
+	return nil
 }
 
 func (r *SQLiteRepository) GetTaskTags(taskID int) ([]Tag, error) {
-	// TODO: Implement in Phase 2
-	return nil, fmt.Errorf("not implemented yet")
+	query := `
+	SELECT t.id, t.name, t.color, t.created_at
+	FROM tags t
+	INNER JOIN task_tags tt ON t.id = tt.tag_id
+	WHERE tt.task_id = ?
+	ORDER BY t.name ASC`
+	
+	rows, err := r.db.Query(query, taskID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get task tags: %w", err)
+	}
+	defer rows.Close()
+	
+	var tags []Tag
+	for rows.Next() {
+		tag := Tag{}
+		err := rows.Scan(
+			&tag.ID,
+			&tag.Name,
+			&tag.Color,
+			&tag.CreatedAt,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan tag: %w", err)
+		}
+		tags = append(tags, tag)
+	}
+	
+	return tags, nil
 }
 
 func (r *SQLiteRepository) GetTasksByTag(tagID int) ([]DatabaseTask, error) {
-	// TODO: Implement in Phase 2
-	return nil, fmt.Errorf("not implemented yet")
+	query := `
+	SELECT t.id, t.title, t.description, t.priority, t.status, t.created_at, t.updated_at, t.due_date, t.user_id, t.category_id, t.is_archived
+	FROM tasks t
+	INNER JOIN task_tags tt ON t.id = tt.task_id
+	WHERE tt.tag_id = ? AND t.is_archived = FALSE
+	ORDER BY t.created_at DESC`
+	
+	rows, err := r.db.Query(query, tagID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get tasks by tag: %w", err)
+	}
+	defer rows.Close()
+	
+	var tasks []DatabaseTask
+	for rows.Next() {
+		task := DatabaseTask{}
+		err := rows.Scan(
+			&task.ID,
+			&task.Title,
+			&task.Description,
+			&task.Priority,
+			&task.Status,
+			&task.CreatedAt,
+			&task.UpdatedAt,
+			&task.DueDate,
+			&task.UserID,
+			&task.CategoryID,
+			&task.IsArchived,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan task: %w", err)
+		}
+		tasks = append(tasks, task)
+	}
+	
+	return tasks, nil
 }
 
 // User operations (Phase 5)

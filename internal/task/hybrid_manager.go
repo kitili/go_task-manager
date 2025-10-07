@@ -396,6 +396,11 @@ func (htm *HybridTaskManager) LoadFromDatabase() error {
 
 // convertToDatabaseTask converts a task.Task to database.DatabaseTask
 func convertToDatabaseTask(t Task) *database.DatabaseTask {
+	var categoryID *int
+	if t.Category != nil {
+		categoryID = &t.Category.ID
+	}
+	
 	return &database.DatabaseTask{
 		ID:          t.ID,
 		Title:       t.Title,
@@ -405,7 +410,7 @@ func convertToDatabaseTask(t Task) *database.DatabaseTask {
 		CreatedAt:   t.CreatedAt,
 		UpdatedAt:   t.UpdatedAt,
 		DueDate:     t.DueDate,
-		CategoryID:  nil, // Will be set when categories are implemented
+		CategoryID:  categoryID,
 		UserID:      nil, // Will be set when users are implemented
 		IsArchived:  false,
 	}
@@ -413,7 +418,7 @@ func convertToDatabaseTask(t Task) *database.DatabaseTask {
 
 // convertFromDatabaseTask converts a database.DatabaseTask to task.Task
 func convertFromDatabaseTask(dt *database.DatabaseTask) Task {
-	return Task{
+	task := Task{
 		ID:          dt.ID,
 		Title:       dt.Title,
 		Description: dt.Description,
@@ -422,7 +427,20 @@ func convertFromDatabaseTask(dt *database.DatabaseTask) Task {
 		CreatedAt:   dt.CreatedAt,
 		UpdatedAt:   dt.UpdatedAt,
 		DueDate:     dt.DueDate,
+		Category:    nil,
+		Tags:        []Tag{},
 	}
+	
+	// Load category if categoryID is set
+	if dt.CategoryID != nil {
+		// Note: This would require a repository reference to load the category
+		// For now, we'll leave it as nil and load it separately when needed
+	}
+	
+	// Tags will be loaded separately when needed
+	// This avoids circular dependencies and keeps the converter simple
+	
+	return task
 }
 
 // convertFromDatabaseTasks converts a slice of database.DatabaseTask to []task.Task
